@@ -18,20 +18,10 @@ import os
 
 app = Flask(__name__)
 
-logging.basicConfig(level=logging.DEBUG,
-                    format='%(asctime)s %(levelname)s %(message)s',
-                    datefmt='%Y-%m-%d %H:%M:%S')
 
-# Set Flask's log level to DEBUG
-app.logger.setLevel(logging.DEBUG)
-
-
-global chatbot_llm_chain
-global knowledgebase_llm
-global knowledgebase_qa
 
 def setup_chatbot_llm():
-    global chatbot_llm_chain
+
     template = """
     You are a chatbot that had a conversation with a human. Consider the previous conversation to answer the new question.
 
@@ -44,11 +34,10 @@ def setup_chatbot_llm():
     llm = Cohere(cohere_api_key=os.environ["COHERE_API_KEY"])
     memory = ConversationBufferMemory(memory_key="chat_history")
     chatbot_llm_chain = LLMChain(prompt=prompt, llm=llm, verbose=True, memory=memory)
-    
+
 
 def setup_knowledgebase_llm():
-    global knowledgebase_qa
-    app.logger.debug('Setting KB')
+
     try:
         # Used for mathematical rep of the book
         embeddings = CohereEmbeddings(cohere_api_key=os.environ["COHERE_API_KEY"])
@@ -62,26 +51,23 @@ def setup_knowledgebase_llm():
             retriever=vectordb.as_retriever(),
             return_source_documents=True
         )
-        print("Successfully setup the KB")
+        ***return knowledgebase_qa***
     except Exception as e:
         print("Error:", e)
 
-
-def setup():
-    setup_chatbot_llm()
-    setup_knowledgebase_llm()
-
+# using this
+***qa = setup_knowledgebase_llm()**
 def answer_from_knowledgebase(message):
-    global knowledgebase_qa
-    app.logger.debug('Before query')
-    res = knowledgebase_qa({"query": message})
-    app.logger.debug('Query successful')
+
+
+    res = qa({"query": message})
+
 
     return res['result']
 
 def search_knowledgebase(message):
-    global knowledgebase_qa
-    res = knowledgebase_qa({"query": message})
+
+    res = qa({"query": message})
     sources = ""
     for count, source in enumerate(res['source_documents'],1):
         sources += "Source " + str(count) + "\n"
@@ -100,31 +86,31 @@ def answer_as_chatbot(message):
 @app.route('/kbanswer', methods=['POST'])
 def kbanswer():
     message = request.json['message']
-    
+
     # Generate a response
     response_message = answer_from_knowledgebase(message)
-    
+
     # Return the response as JSON
     return jsonify({'message': response_message}), 200
-    
+
 
 @app.route('/search', methods=['POST'])
 def search():    
     message = request.json['message']
-    
+
     # Generate a response
     response_message = search_knowledgebase(message)
-    
+
     # Return the response as JSON
     return jsonify({'message': response_message}), 200
 
 @app.route('/answer', methods=['POST'])
 def answer():
     message = request.json['message']
-    
+
     # Generate a response
     response_message = answer_as_chatbot(message)
-    
+
     # Return the response as JSON
     return jsonify({'message': response_message}), 200
 
