@@ -1,10 +1,3 @@
-## Changes required
-
-You need to make some changes in the above code:
-
-```
-
-
 from flask import Flask, render_template
 from flask import request, jsonify, abort
 import logging
