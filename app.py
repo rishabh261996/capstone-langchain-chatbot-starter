@@ -51,12 +51,12 @@ def setup_knowledgebase_llm():
             retriever=vectordb.as_retriever(),
             return_source_documents=True
         )
-        ***return knowledgebase_qa***
+        return knowledgebase_qa
     except Exception as e:
         print("Error:", e)
 
 #using this
-***qa = setup_knowledgebase_llm()**
+qa = setup_knowledgebase_llm()
 def answer_from_knowledgebase(message):
     
     
