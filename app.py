@@ -1,3 +1,10 @@
+## Changes required
+
+You need to make some changes in the above code:
+
+```
+
+
 from flask import Flask, render_template
 from flask import request, jsonify, abort
 import logging
@@ -21,7 +28,7 @@ app = Flask(__name__)
 
 
 def setup_chatbot_llm():
-
+    
     template = """
     You are a chatbot that had a conversation with a human. Consider the previous conversation to answer the new question.
 
@@ -34,10 +41,10 @@ def setup_chatbot_llm():
     llm = Cohere(cohere_api_key=os.environ["COHERE_API_KEY"])
     memory = ConversationBufferMemory(memory_key="chat_history")
     chatbot_llm_chain = LLMChain(prompt=prompt, llm=llm, verbose=True, memory=memory)
-
+    
 
 def setup_knowledgebase_llm():
-
+    
     try:
         # Used for mathematical rep of the book
         embeddings = CohereEmbeddings(cohere_api_key=os.environ["COHERE_API_KEY"])
@@ -55,18 +62,18 @@ def setup_knowledgebase_llm():
     except Exception as e:
         print("Error:", e)
 
-# using this
+#using this
 ***qa = setup_knowledgebase_llm()**
 def answer_from_knowledgebase(message):
-
-
+    
+    
     res = qa({"query": message})
-
+    
 
     return res['result']
 
 def search_knowledgebase(message):
-
+    
     res = qa({"query": message})
     sources = ""
     for count, source in enumerate(res['source_documents'],1):
@@ -86,31 +93,31 @@ def answer_as_chatbot(message):
 @app.route('/kbanswer', methods=['POST'])
 def kbanswer():
     message = request.json['message']
-
+    
     # Generate a response
     response_message = answer_from_knowledgebase(message)
-
+    
     # Return the response as JSON
     return jsonify({'message': response_message}), 200
-
+    
 
 @app.route('/search', methods=['POST'])
 def search():    
     message = request.json['message']
-
+    
     # Generate a response
     response_message = search_knowledgebase(message)
-
+    
     # Return the response as JSON
     return jsonify({'message': response_message}), 200
 
 @app.route('/answer', methods=['POST'])
 def answer():
     message = request.json['message']
-
+    
     # Generate a response
     response_message = answer_as_chatbot(message)
-
+    
     # Return the response as JSON
     return jsonify({'message': response_message}), 200
 
